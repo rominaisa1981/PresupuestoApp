@@ -1,5 +1,6 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -14,10 +15,6 @@ using PresupuestoApi.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// SERVICIOS
-// ============================================================
-
 // Controllers
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
@@ -26,11 +23,18 @@ builder.Services.AddControllers()
         opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
+// Para trabajar detrás de Nginx en Oracle
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
 // EF Core con SQL Server
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Servicios de la app
+// Servicios
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
@@ -38,7 +42,7 @@ builder.Services.AddScoped<IMovimientoService, MovimientoService>();
 builder.Services.AddScoped<IQuincenaService, QuincenaService>();
 builder.Services.AddScoped<IResumenService, ResumenService>();
 
-// JWT Authentication
+// JWT
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Jwt:Key no configurado");
 
@@ -60,7 +64,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// CORS para Angular
+// CORS
 var origenes = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:4200" };
 
@@ -72,7 +76,7 @@ builder.Services.AddCors(opts =>
               .AllowAnyMethod());
 });
 
-// Swagger con soporte para JWT
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -103,13 +107,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ============================================================
-// PIPELINE
-// ============================================================
-
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente al iniciar (cómodo en desarrollo)
+// Migraciones automáticas
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -124,7 +124,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionMiddleware>();
 
+app.UseForwardedHeaders();
+
 app.UseHttpsRedirection();
+
 app.UseCors("AngularApp");
 
 app.UseAuthentication();
