@@ -1,0 +1,28 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# .NET
+bin/
+obj/
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Configuración sensible
+.env
+.env.*
+appsettings.Development.json
+
+# Sistema
+.DS_Store
+Thumbs.db

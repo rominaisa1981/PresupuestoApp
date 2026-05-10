@@ -1,0 +1,20 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+
+## Rider
+.idea/
+
+## Output
+out/
+publish/
+
+## Logs
+*.log
+
+## Configuración local con secretos
+appsettings.Local.json

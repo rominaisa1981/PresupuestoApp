@@ -1,0 +1,196 @@
+<app-navbar />
+
+<div class="min-h-screen bg-slate-950 p-4 md:p-6">
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header + selector de período -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+        <p class="text-slate-400 text-sm">Resumen mensual de tu presupuesto</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select [(ngModel)]="mesSeleccionado"
+                class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg
+                       px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          @for (mes of meses; track mes.valor) {
+            <option [value]="mes.valor">{{ mes.nombre }}</option>
+          }
+        </select>
+        <select [(ngModel)]="anioSeleccionado"
+                class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg
+                       px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          @for (a of anios; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+        <button (click)="cargarResumen()"
+                class="bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium
+                       px-4 py-2 rounded-lg transition-all">
+          Ver
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (cargando()) {
+      <div class="text-center py-20 text-slate-400">Cargando...</div>
+    }
+
+    <!-- Error / sin datos -->
+    @if (!cargando() && error()) {
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
+        <p class="text-slate-400 mb-4">{{ error() }}</p>
+        <a routerLink="/quincenas/nueva"
+           class="inline-block bg-emerald-500 hover:bg-emerald-400 text-white
+                  text-sm font-medium px-5 py-2.5 rounded-lg transition-all">
+          + Crear quincena
+        </a>
+      </div>
+    }
+
+    <!-- Datos del resumen -->
+    @if (!cargando() && resumen()) {
+      <!-- 4 Stat Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Neto recibir -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <p class="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Neto recibido</p>
+          <p class="text-emerald-400 text-2xl font-bold">
+            {{ resumen()!.netoRecibir | currency:'USD':'symbol':'1.2-2' }}
+          </p>
+          <p class="text-slate-500 text-xs mt-1">Haberes − Descuentos</p>
+        </div>
+
+        <!-- Total pagos -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <p class="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Pagos fijos</p>
+          <p class="text-red-400 text-2xl font-bold">
+            {{ resumen()!.totalPagos | currency:'USD':'symbol':'1.2-2' }}
+          </p>
+          <p class="text-slate-500 text-xs mt-1">Tarjetas · servicios · deudas</p>
+        </div>
+
+        <!-- Total gastos -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <p class="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Gastos variables</p>
+          <p class="text-yellow-400 text-2xl font-bold">
+            {{ resumen()!.totalGastos | currency:'USD':'symbol':'1.2-2' }}
+          </p>
+          <p class="text-slate-500 text-xs mt-1">Comida · gasolina · otros</p>
+        </div>
+
+        <!-- Saldo final -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <p class="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">Saldo final</p>
+          <p class="text-2xl font-bold"
+             [ngClass]="resumen()!.saldoFinal >= 0 ? 'text-emerald-400' : 'text-red-400'">
+            {{ resumen()!.saldoFinal | currency:'USD':'symbol':'1.2-2' }}
+          </p>
+          <p class="text-slate-500 text-xs mt-1">Neto − Pagos − Gastos</p>
+        </div>
+      </div>
+
+      <!-- Quincenas del mes -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-white font-semibold">
+            Quincenas — {{ nombreMesSeleccionado() }} {{ anioSeleccionado }}
+          </h2>
+          <a routerLink="/quincenas"
+             class="text-emerald-400 hover:text-emerald-300 text-sm transition-colors">
+            Ver todas →
+          </a>
+        </div>
+
+        @if (resumen()!.quincenas.length === 0) {
+          <p class="text-slate-500 text-sm text-center py-6">
+            No hay quincenas registradas este mes.
+          </p>
+        } @else {
+          <div class="grid sm:grid-cols-2 gap-4">
+            @for (q of resumen()!.quincenas; track q.id) {
+              <a [routerLink]="['/quincenas', q.id]"
+                 class="block bg-slate-800 hover:bg-slate-750 border border-slate-700
+                        hover:border-slate-600 rounded-xl p-4 transition-all group">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <span class="text-xs font-medium text-emerald-400 bg-emerald-400/10
+                                 px-2 py-0.5 rounded-full">
+                      {{ q.numero === 1 ? '1era quincena' : '2da quincena' }}
+                    </span>
+                    <p class="text-slate-400 text-xs mt-1">
+                      {{ q.fechaPago | date:'dd/MM/yyyy' }}
+                    </p>
+                  </div>
+                  <span class="text-slate-500 group-hover:text-slate-300 transition-colors text-lg">→</span>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Neto recibido</span>
+                    <span class="text-emerald-400 font-medium">
+                      {{ q.netoRecibir | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Pagos + Gastos</span>
+                    <span class="text-red-400 font-medium">
+                      {{ (q.totalPagos + q.totalGastos) | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                  <div class="border-t border-slate-700 pt-1 flex justify-between text-sm font-medium">
+                    <span class="text-white">Saldo</span>
+                    <span [ngClass]="q.saldo >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                      {{ q.saldo | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Resumen por categoría (Pagos y Gastos) -->
+      @if (resumen()!.resumenPorCategoria.length > 0) {
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <h2 class="text-white font-semibold mb-4">Desglose por categoría</h2>
+          <div class="space-y-3">
+            @for (cat of resumen()!.resumenPorCategoria; track cat.categoriaNombre) {
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                         [style.background-color]="cat.color ?? '#64748b'"></div>
+                    <span class="text-slate-300 text-sm">{{ cat.categoriaNombre }}</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-sm">
+                    @if (cat.presupuestoMensual) {
+                      <span class="text-slate-500 text-xs">
+                        {{ cat.porcentajeUso?.toFixed(0) }}% de
+                        {{ cat.presupuestoMensual | currency:'USD':'symbol':'1.0-0' }}
+                      </span>
+                    }
+                    <span class="text-white font-medium">
+                      {{ cat.total | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                </div>
+                @if (cat.presupuestoMensual) {
+                  <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                         [ngClass]="colorBarra(cat.porcentajeUso)"
+                         [style.width.%]="porcentajeBarra(cat.porcentajeUso)">
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+
+  </div>
+</div>

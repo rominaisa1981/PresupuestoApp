@@ -1,0 +1,70 @@
+<app-navbar />
+
+<div class="min-h-screen bg-slate-950 p-4 md:p-6">
+  <div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Quincenas</h1>
+        <p class="text-slate-400 text-sm">Historial de tus períodos de pago</p>
+      </div>
+      <a routerLink="/quincenas/nueva"
+         class="bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium
+                px-4 py-2 rounded-lg transition-all">
+        + Nueva quincena
+      </a>
+    </div>
+
+    @if (cargando()) {
+      <div class="text-center py-20 text-slate-400">Cargando...</div>
+    }
+
+    @if (!cargando() && quincenas().length === 0) {
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
+        <p class="text-slate-400 mb-4">No tienes quincenas registradas aún.</p>
+        <a routerLink="/quincenas/nueva"
+           class="inline-block bg-emerald-500 hover:bg-emerald-400 text-white
+                  text-sm font-medium px-5 py-2.5 rounded-lg transition-all">
+          Crear primera quincena
+        </a>
+      </div>
+    }
+
+    <!-- Lista agrupada por mes -->
+    @for (grupo of quincenasAgrupadas; track grupo.etiqueta) {
+      <div>
+        <h2 class="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3">
+          {{ grupo.etiqueta }}
+        </h2>
+        <div class="space-y-2">
+          @for (q of grupo.items; track q.id) {
+            <a [routerLink]="['/quincenas', q.id]"
+               class="flex items-center justify-between bg-slate-900 hover:bg-slate-800
+                      border border-slate-800 hover:border-slate-700 rounded-xl px-5 py-4
+                      transition-all group">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center
+                            justify-center flex-shrink-0">
+                  <span class="text-emerald-400 font-bold text-sm">Q{{ q.numero }}</span>
+                </div>
+                <div>
+                  <p class="text-white font-medium text-sm">
+                    {{ q.numero === 1 ? '1era Quincena' : '2da Quincena' }}
+                  </p>
+                  <p class="text-slate-500 text-xs">
+                    Pago: {{ q.fechaPago | date:'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+              <span class="text-slate-600 group-hover:text-slate-300 text-xl transition-colors">
+                →
+              </span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

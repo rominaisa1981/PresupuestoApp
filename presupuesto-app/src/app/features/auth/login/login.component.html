@@ -1,0 +1,76 @@
+<div class="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 bg-emerald-500 rounded-2xl mb-4">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-white">Bienvenida</h1>
+      <p class="text-slate-400 mt-1">Ingresa a tu presupuesto</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="space-y-4">
+
+        <!-- Error global -->
+        @if (error) {
+          <div class="bg-red-500/10 border border-red-500/30 text-red-400
+                      rounded-lg px-4 py-3 text-sm">
+            {{ error }}
+          </div>
+        }
+
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+          <input formControlName="email" type="email"
+                 class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg
+                        px-4 py-2.5 text-sm placeholder:text-slate-500
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+                        transition-all"
+                 placeholder="tu@email.com" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="text-red-400 text-xs mt-1">Email inválido</p>
+          }
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Contraseña</label>
+          <input formControlName="password" type="password"
+                 class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg
+                        px-4 py-2.5 text-sm placeholder:text-slate-500
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+                        transition-all"
+                 placeholder="••••••••" />
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <p class="text-red-400 text-xs mt-1">Mínimo 6 caracteres</p>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" [disabled]="form.invalid || cargando"
+                class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700
+                       disabled:text-slate-500 text-white font-medium rounded-lg py-2.5
+                       transition-all mt-2">
+          {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Link registro -->
+    <p class="text-center text-slate-500 text-sm mt-6">
+      ¿No tienes cuenta?
+      <a routerLink="/registro" class="text-emerald-400 hover:text-emerald-300 font-medium ml-1">
+        Crear cuenta
+      </a>
+    </p>
+
+  </div>
+</div>

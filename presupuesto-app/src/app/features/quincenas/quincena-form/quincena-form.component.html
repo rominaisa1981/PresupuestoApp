@@ -1,0 +1,99 @@
+<app-navbar />
+
+<div class="min-h-screen bg-slate-950 p-4 md:p-6">
+  <div class="max-w-md mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+      <a routerLink="/quincenas" class="text-slate-400 hover:text-white transition-colors text-sm">
+        ← Volver
+      </a>
+      <span class="text-slate-700">|</span>
+      <h1 class="text-white font-bold text-lg">Nueva Quincena</h1>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="space-y-4">
+
+        @if (error) {
+          <div class="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 text-sm">
+            {{ error }}
+          </div>
+        }
+
+        <!-- Número de quincena -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Quincena</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 bg-slate-800 border border-slate-700
+                          rounded-lg px-4 py-3 cursor-pointer has-[:checked]:border-emerald-500
+                          has-[:checked]:bg-emerald-500/10 transition-all">
+              <input type="radio" formControlName="numero" [value]="1" class="accent-emerald-500" />
+              <span class="text-white text-sm">1era quincena (15)</span>
+            </label>
+            <label class="flex items-center gap-2 bg-slate-800 border border-slate-700
+                          rounded-lg px-4 py-3 cursor-pointer has-[:checked]:border-emerald-500
+                          has-[:checked]:bg-emerald-500/10 transition-all">
+              <input type="radio" formControlName="numero" [value]="2" class="accent-emerald-500" />
+              <span class="text-white text-sm">2da quincena (fin de mes)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mes y Año -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Mes</label>
+            <select formControlName="mes"
+                    class="w-full bg-slate-800 border border-slate-700 text-white text-sm
+                           rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2
+                           focus:ring-emerald-500 transition-all">
+              @for (m of meses; track m.valor) {
+                <option [value]="m.valor">{{ m.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Año</label>
+            <select formControlName="anio"
+                    class="w-full bg-slate-800 border border-slate-700 text-white text-sm
+                           rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2
+                           focus:ring-emerald-500 transition-all">
+              @for (a of anios; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Fecha de pago -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Fecha de pago</label>
+          <input formControlName="fechaPago" type="date"
+                 class="w-full bg-slate-800 border border-slate-700 text-white text-sm
+                        rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2
+                        focus:ring-emerald-500 transition-all" />
+        </div>
+
+        <!-- Observaciones -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">
+            Observaciones <span class="text-slate-500">(opcional)</span>
+          </label>
+          <input formControlName="observaciones" type="text"
+                 class="w-full bg-slate-800 border border-slate-700 text-white text-sm
+                        rounded-lg px-4 py-2.5 placeholder:text-slate-500
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                 placeholder="Ej: Con décimo tercero" />
+        </div>
+
+        <button type="submit" [disabled]="form.invalid || cargando"
+                class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700
+                       disabled:text-slate-500 text-white font-medium rounded-lg py-2.5
+                       transition-all mt-2">
+          {{ cargando ? 'Creando...' : 'Crear quincena' }}
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
